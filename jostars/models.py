@@ -1,7 +1,8 @@
-from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.conf import settings
+
+from users.models import JostarUser
 
 
 class BaseJostarModel(models.Model):
@@ -11,12 +12,6 @@ class BaseJostarModel(models.Model):
 
     class Meta:
         abstract = True
-
-
-class JostarUser(AbstractUser):
-    # Added this model just in case I need to add
-    # more fields to my user entity
-    pass
 
 
 class Jostar(BaseJostarModel):
