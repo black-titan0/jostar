@@ -1,3 +1,9 @@
-from django.shortcuts import render
+from rest_framework import generics, permissions
+from .models import Jostar
+from .serializers import JostarSerializer
 
-# Create your views here.
+
+class JostarCreateView(generics.CreateAPIView):
+    queryset = Jostar.objects.all()
+    serializer_class = JostarSerializer
+    permission_classes = [permissions.IsAuthenticated]
