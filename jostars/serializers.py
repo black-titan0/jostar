@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Jostar
+from users.models import JostarUser
 
 
 class CreateJostarSerializer(serializers.ModelSerializer):
@@ -13,6 +14,8 @@ class CreateJostarSerializer(serializers.ModelSerializer):
 
 
 class JostarSerializer(serializers.ModelSerializer):
+    author_name = serializers.CharField(source='author.username', read_only=True)
+
     class Meta:
         model = Jostar
-        fields = '__all__'
+        fields = ['id', 'title', 'content', 'created_at', 'updated_at', 'author_name']
