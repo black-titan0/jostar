@@ -1,3 +1,8 @@
-from django.shortcuts import render
+from rest_framework import generics
+from rest_framework.permissions import AllowAny
+from .serializers import UserSignupSerializer
 
-# Create your views here.
+
+class UserSignupView(generics.CreateAPIView):
+    serializer_class = UserSignupSerializer
+    permission_classes = [AllowAny]
