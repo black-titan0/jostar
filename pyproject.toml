@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "jostar"
+version = "0.1.0"
+description = "a platform to post and rate jostars"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^5.1"
+djangorestframework = "^3.15.2"
+celery = "^5.4.0"
+redis = "^5.0.8"
+psycopg2-binary = "^2.9.9"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
