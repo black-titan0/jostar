@@ -26,7 +26,7 @@ class Jostar(BaseJostarModel):
     average_rating = models.FloatField(null=False, default=0)
 
 
-class Rating(models.Model):
+class Rating(BaseJostarModel):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -45,7 +45,6 @@ class Rating(models.Model):
             MaxValueValidator(5)
         ]
     )
-    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('user', 'jostar')

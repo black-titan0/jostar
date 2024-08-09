@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import Jostar
-from users.models import JostarUser
 
 
 class CreateJostarSerializer(serializers.ModelSerializer):
@@ -18,4 +17,8 @@ class JostarSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Jostar
-        fields = ['id', 'title', 'content', 'created_at', 'updated_at', 'author_name']
+        fields = [
+            'id', 'title', 'content',
+            'created_at', 'updated_at', 'author_name',
+            'number_of_ratings', 'average_rating',
+        ]
