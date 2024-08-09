@@ -22,3 +22,8 @@ class JostarSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at', 'author_name',
             'number_of_ratings', 'average_rating',
         ]
+
+
+class RatingSerializer(serializers.Serializer):
+    jostar_id = serializers.IntegerField()
+    rating = serializers.IntegerField(min_value=1, max_value=5)
