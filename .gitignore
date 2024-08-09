@@ -1,0 +1,70 @@
+# Python Bytecode
+__pycache__/
+*.py[cod]
+
+# Django stuff
+*.log
+local_settings.py
+db.sqlite3
+/media
+/static
+*.pot
+*.pyc
+*.pyo
+
+# Poetry
+.poetry/
+*.lock
+poetry.lock
+
+# PyCharm
+.idea/
+*.iml
+
+# Environment variables
+.env
+.env.*
+
+# MacOS
+.DS_Store
+
+# Linux
+*~
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# VSCode
+.vscode/
+
+# Coverage reports
+.coverage
+coverage.xml
+*.cover
+*.py,cover
+
+# Test and development tools
+nosetests.xml
+*.cover
+*.log
+*.pot
+
+# Pipenv
+Pipfile
+Pipfile.lock
+
+# Sphinx documentation
+docs/_build/
+build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Data files
+*.csv
+*.dat
+
+# Other files
+*.sublime-project
+*.sublime-workspace
