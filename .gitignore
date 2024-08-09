@@ -68,3 +68,7 @@ build/
 # Other files
 *.sublime-project
 *.sublime-workspace
+
+
+# Venv
+JostarVenv
