@@ -43,7 +43,7 @@ class RateJostarView(views.APIView):
             }
             redis_key = f"jr:{request.user.id}:{data['jostar_id']}"
             already_cached_value = RedisProxy.get_cached_value(redis_key)
-            if already_cached_value:
+            if already_cached_value and int(already_cached_value) == data['rating']:
                 return Response(
                     {"message": "Jostar is Already Rated!"},
                     status=status.HTTP_400_BAD_REQUEST
