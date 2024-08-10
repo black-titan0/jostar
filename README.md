@@ -265,13 +265,3 @@ def get_should_effect_average(share_token):
 - **Real-Time Monitoring**: Using Redis allows for quick checks and updates, ensuring that the system can respond in real-time to abnormal patterns.
 
 These strategies enhance the robustness of the rating system by intelligently managing ratings and responding to potential manipulation in real time.
-
-
-### Explanation
-
-- **Weighted Ratings**: This section explains how you calculate the weight of a rating based on recent activity using an exponential decay formula.
-- **Share Link Tracking**: Describes how you track and manage ratings coming from shared links, with steps to ensure these ratings do not unduly influence the Jostar's score.
-- **Code Examples**: Each strategy is accompanied by a code snippet to illustrate its implementation.
-- **Benefits**: Summarizes the advantages of employing these methods to maintain the integrity of the rating system.
-
-This markdown provides a comprehensive overview of your rating manipulation prevention strategies, helping users and developers understand the mechanisms in place to ensure fair and reliable ratings. If you need further customization or have additional questions, feel free to ask!
