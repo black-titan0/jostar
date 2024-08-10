@@ -1,9 +1,11 @@
 import os
 from pathlib import Path
 from datetime import timedelta
+from cryptography.fernet import Fernet
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-l=yr^p+x5^3l0a#x$^39w1a4s0*i33@^=8%f@w&6un^t@b1a7z'
+CRYPTOGRAPHY_SECRET_KEY = Fernet.generate_key()
 
 DEBUG = True
 
@@ -120,3 +122,6 @@ REDIS_CACHE_TIMEOUT = os.getenv('REDIS_CACHE_TIMEOUT')
 MAX_NORMAL_RATING_COUNT_IN_ONE_HOUR = os.getenv('MAX_NORMAL_RATING_COUNT_IN_ONE_HOUR', 50)
 RATING_WEIGHT_DOWNGRADING_FACTOR = os.getenv('RATING_WEIGHT_DOWNGRADING_FACTOR', 0.01)
 RATING_WEIGHT_NORMALIZER_FACTOR = os.getenv('RATING_WEIGHT_DOWNGRADING_FACTOR', 1.648)
+
+# Website settings
+JOSTAR_URL = os.getenv('JOSTAR_URL', 'jostar.ir')

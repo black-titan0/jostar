@@ -1,13 +1,17 @@
 import json
 import math
 
+from cryptography.fernet import InvalidToken
 from django.db.models import Prefetch
+from django.shortcuts import get_object_or_404
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status, views
 from rest_framework.permissions import IsAuthenticated
 from Jostar import settings
 from proxies.kafka import KafkaProxy
 from proxies.redis import RedisProxy
+from utils.cryptography import EncryptionUtils
 from .models import Jostar, Rating
 from .paginations import JostarPageNumberPagination
 from .serializers import CreateJostarSerializer, JostarSerializer
@@ -112,7 +116,7 @@ class RateJostarView(views.APIView):
                 n = int(number_of_ratings_in_past_hour)
                 RedisProxy.increment_key(key=rating_weight_redis_key)
                 weight = ((1 / (math.exp(settings.RATING_WEIGHT_DOWNGRADING_FACTOR * (n - settings.
-                                         MAX_NORMAL_RATING_COUNT_IN_ONE_HOUR)))) / settings.
+                                                                                      MAX_NORMAL_RATING_COUNT_IN_ONE_HOUR)))) / settings.
                           RATING_WEIGHT_NORMALIZER_FACTOR)
                 message['weight'] = weight
             else:
@@ -126,3 +130,43 @@ class RateJostarView(views.APIView):
 
             return Response(status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ShareJostarView(views.APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, jostar_id):
+        get_object_or_404(Jostar, id=jostar_id)
+        user_id = request.user.id
+        info = f"{user_id}:{jostar_id}"
+        encrypted_info = EncryptionUtils.encrypt_info(info)
+
+        shareable_link = f"{settings.JOSTAR_URL}/jostar/{encrypted_info}"
+
+        return Response({"link": shareable_link}, status=status.HTTP_200_OK)
+
+
+class GetJostarByLinkView(views.APIView):
+    permission_classes = [IsAuthenticated]  # Ensure the user is authenticated
+
+    def get(self, request, token):
+        try:
+            # Decrypt the encrypted information
+            decrypted_info = EncryptionUtils.decrypt_info(token)
+            split_info = decrypted_info.split(':')
+            # Extract the user ID and Jostar ID from the decrypted info
+            user_id = request.user.id
+            jostar_id = int(split_info[1])
+
+            # Get the Jostar object
+            jostar = get_object_or_404(Jostar, id=jostar_id)
+            rating = Rating.objects.filter(user_id=user_id, jostar_id=jostar_id).first()
+            jostar.user_rating = [rating] if rating else []
+            # Serialize the Jostar object
+            serializer = JostarSerializer(jostar)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except InvalidToken as _:
+            return Response({"error": "Broken Link!"}, status=status.HTTP_400_BAD_REQUEST)
+        except IndexError as _:
+            return Response({"error": "Broken Link!"}, status=status.HTTP_400_BAD_REQUEST)
