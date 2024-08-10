@@ -38,7 +38,7 @@ class Command(BaseCommand):
     def process_batch(self, batch, kafka_consumer):
         ratings_to_create = []
         ratings_to_update = []
-        jostar_updates = defaultdict(lambda: {'count': 0, 'sum': 0, 'weight': 0})
+        jostar_updates = defaultdict(lambda: {'count': 0, 'sum': 0, 'weight': 1, 'should_effect_average': True})
 
         # Process each message in the batch
         for msg in batch:
@@ -53,6 +53,7 @@ class Command(BaseCommand):
             jostar_id = message['jostar_id']
             rating_value = message['rating']
             weight = message['weight']
+            should_effect_average = message['should_effect_average']
 
             # Check if the rating already exists with the same value
             existing_rating = Rating.objects.filter(
@@ -74,15 +75,17 @@ class Command(BaseCommand):
 
             if existing_rating:
                 # Update existing rating
-                jostar_updates[jostar_id]['sum'] += (rating_value - existing_rating.rating)
                 existing_rating.rating = rating_value
                 ratings_to_update.append(existing_rating)
+                if should_effect_average:
+                    jostar_updates[jostar_id]['sum'] += (rating_value - existing_rating.rating)
             else:
                 # Create a new rating
                 ratings_to_create.append(rating)
-                jostar_updates[jostar_id]['count'] += 1
-                jostar_updates[jostar_id]['weight'] += weight
-                jostar_updates[jostar_id]['sum'] += (rating_value * weight)
+                if should_effect_average:
+                    jostar_updates[jostar_id]['count'] += 1
+                    jostar_updates[jostar_id]['weight'] += weight
+                    jostar_updates[jostar_id]['sum'] += (rating_value * weight)
 
         # Perform batch database operations
         with transaction.atomic():
