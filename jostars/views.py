@@ -127,7 +127,7 @@ class RateJostarView(views.APIView):
 class ShareJostarView(views.APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, jostar_id):
+    def get(self, request, jostar_id):
         get_object_or_404(Jostar, id=jostar_id)
         user_id = request.user.id
         info = f"{user_id}:{jostar_id}"
