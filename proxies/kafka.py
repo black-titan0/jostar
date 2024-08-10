@@ -1,5 +1,7 @@
 from confluent_kafka import Producer
 
+from Jostar import settings
+
 
 class KafkaProxy:
     @staticmethod
@@ -9,5 +11,5 @@ class KafkaProxy:
 
 
 kafka_producer = Producer({
-    'bootstrap.servers': 'localhost:9092'
+    'bootstrap.servers': settings.KAFKA_BOOTSTRAP_SERVER_ADDRESS
 })
