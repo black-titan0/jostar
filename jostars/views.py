@@ -1,4 +1,6 @@
 import json
+
+from django.db.models import Prefetch
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status, views
 from rest_framework.permissions import IsAuthenticated
@@ -23,6 +25,17 @@ class JostarListView(generics.ListAPIView):
     serializer_class = JostarSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = JostarPageNumberPagination
+
+    def get_queryset(self):
+        user = self.request.user
+        user_ratings = Rating.objects.filter(user=user).filter(is_deleted=False)
+        return Jostar.objects.order_by('-created_at').all().prefetch_related(
+            Prefetch(
+                'ratings',
+                queryset=user_ratings,
+                to_attr='user_rating'
+            )
+        )
 
 
 class RateJostarView(views.APIView):
