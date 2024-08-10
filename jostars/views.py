@@ -17,6 +17,7 @@ from .paginations import JostarPageNumberPagination
 from .serializers import CreateJostarSerializer, JostarSerializer
 from rest_framework.response import Response
 from .serializers import RatingSerializer
+from .services.rating_cache import get_rating_weight, get_should_effect_average
 
 
 class JostarCreateView(generics.CreateAPIView):
@@ -75,10 +76,9 @@ class JostarListView(generics.ListAPIView):
         else:
             jostars = cached_jostars  # If no prefetch needed, just use cached jostars
 
-        # Ensure `user_rating_obj` is correctly set after prefetching
         for jostar in jostars:
-            if hasattr(jostar, 'user_rating_objs') and jostar.user_rating_objs:
-                jostar.user_rating_obj = jostar.user_rating_objs[0]
+            if hasattr(jostar, 'user_rating') and jostar.user_rating:
+                jostar.user_rating = jostar.user_rating[0]
 
         return jostars
 
@@ -94,11 +94,13 @@ class RateJostarView(views.APIView):
         serializer = RatingSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.validated_data
+            share_token = request.query_params.get('share_token')
             message = {
                 'user_id': request.user.id,
                 'jostar_id': data['jostar_id'],
                 'rating': data['rating'],
                 'weight': 1,
+                'should_effect_average': get_should_effect_average(share_token)
             }
             redis_key = f"jr:{request.user.id}:{data['jostar_id']}"
             already_cached_value = RedisProxy.get_cached_value(redis_key)
@@ -109,18 +111,8 @@ class RateJostarView(views.APIView):
                 )
             RedisProxy.cache_with_ttl(key=redis_key, value=data['rating'])
 
-            rating_weight_redis_key = f"jrw:{data['jostar_id']}"
-            number_of_ratings_in_past_hour = \
-                RedisProxy.get_cached_value(rating_weight_redis_key)
-            if number_of_ratings_in_past_hour:
-                n = int(number_of_ratings_in_past_hour)
-                RedisProxy.increment_key(key=rating_weight_redis_key)
-                weight = ((1 / (math.exp(settings.RATING_WEIGHT_DOWNGRADING_FACTOR * (n - settings.
-                                                                                      MAX_NORMAL_RATING_COUNT_IN_ONE_HOUR)))) / settings.
-                          RATING_WEIGHT_NORMALIZER_FACTOR)
-                message['weight'] = weight
-            else:
-                RedisProxy.cache_with_ttl(key=rating_weight_redis_key, value=1, ttl=60 * 60)
+            weight = get_rating_weight(data['jostar_id'])
+            message['weight'] = weight
             message_str = json.dumps(message)
 
             KafkaProxy.simple_produce_to_topic(
@@ -134,6 +126,7 @@ class RateJostarView(views.APIView):
 
 class ShareJostarView(views.APIView):
     permission_classes = [IsAuthenticated]
+
     def post(self, request, jostar_id):
         get_object_or_404(Jostar, id=jostar_id)
         user_id = request.user.id
@@ -160,7 +153,7 @@ class GetJostarByLinkView(views.APIView):
             # Get the Jostar object
             jostar = get_object_or_404(Jostar, id=jostar_id)
             rating = Rating.objects.filter(user_id=user_id, jostar_id=jostar_id).first()
-            jostar.user_rating = [rating] if rating else []
+            jostar.user_rating = rating
             # Serialize the Jostar object
             serializer = JostarSerializer(jostar)
 

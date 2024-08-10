@@ -33,7 +33,7 @@ class JostarSerializer(serializers.ModelSerializer):
 
     def get_rating(self, obj):
         if hasattr(obj, 'user_rating') and obj.user_rating:
-            return obj.user_rating[0].rating
+            return obj.user_rating.rating
         return None
 
 
