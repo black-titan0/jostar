@@ -12,7 +12,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         kafka_consumer = Consumer({
-            'bootstrap.servers': 'localhost:9092',  # Replace with your Kafka broker address
+            'bootstrap.servers': settings.KAFKA_BOOTSTRAP_SERVER_ADDRESS,
             'group.id': 'rating_consumers',
             'auto.offset.reset': 'earliest',
             'enable.auto.commit': True,
