@@ -173,9 +173,6 @@ The Jostar system uses Apache Kafka to handle ratings processing asynchronously.
 - **Producer**: When a user submits a rating, a message is published to a Kafka topic.
 - **Consumer**: A Kafka consumer processes these messages in bulk, updating the database with new ratings and recalculating Jostar statistics.
 
-
-Certainly! Below is a complete markdown section for the Rating Manipulation Prevention methods, including both the weighted ratings and share link tracking strategies, with a clear explanation and the mathematical formula formatted as a LaTeX expression.
-
 ## Rating Manipulation Prevention
 
 To ensure the integrity of the rating system and prevent malicious attempts to manipulate ratings, the Jostar system employs two key strategies: weighted ratings and share link tracking. These methods help maintain fairness and accuracy in the ratings.
