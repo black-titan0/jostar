@@ -27,7 +27,7 @@ This project is a system design exercise, so I tried to keep thing scalable and 
 
 ## Architecture
 
-The diagram below, shows an overview of system architecture, components and their relations.
+The diagram below, shows an overview of the system's architecture, components and their relations.
 ![Design (2)](https://github.com/user-attachments/assets/c2abece2-32c7-4de5-b299-b91c0426fb8d)
 
 The architecture includes components such as:
