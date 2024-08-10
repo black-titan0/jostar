@@ -15,6 +15,12 @@ class RedisProxy:
             return value.decode('utf-8')  # Decode bytes to string
         return None
 
+    @staticmethod
+    def increment_key(key):
+        if redis_client.exists(key):
+            return redis_client.incr(key)
+        else:
+            return None
 
 redis_client = redis.StrictRedis(
     host=settings.REDIS_HOST,

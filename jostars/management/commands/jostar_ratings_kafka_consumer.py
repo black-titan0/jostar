@@ -38,7 +38,7 @@ class Command(BaseCommand):
     def process_batch(self, batch, kafka_consumer):
         ratings_to_create = []
         ratings_to_update = []
-        jostar_updates = defaultdict(lambda: {'count': 0, 'sum': 0})  # Maps jostar_id to count and sum of new ratings
+        jostar_updates = defaultdict(lambda: {'count': 0, 'sum': 0, 'weight': 0})
 
         # Process each message in the batch
         for msg in batch:
@@ -48,9 +48,11 @@ class Command(BaseCommand):
 
             # Decode the message
             message = json.loads(msg.value().decode('utf-8'))
+            print(f"Got the message: {message}")
             user_id = message['user_id']
             jostar_id = message['jostar_id']
             rating_value = message['rating']
+            weight = message['weight']
 
             # Check if the rating already exists with the same value
             existing_rating = Rating.objects.filter(
@@ -79,7 +81,8 @@ class Command(BaseCommand):
                 # Create a new rating
                 ratings_to_create.append(rating)
                 jostar_updates[jostar_id]['count'] += 1
-                jostar_updates[jostar_id]['sum'] += rating_value
+                jostar_updates[jostar_id]['weight'] += weight
+                jostar_updates[jostar_id]['sum'] += (rating_value * weight)
 
         # Perform batch database operations
         with transaction.atomic():
@@ -97,8 +100,9 @@ class Command(BaseCommand):
 
                 # Update the Jostar's number_of_ratings and average_rating incrementally
                 new_count = jostar.number_of_ratings + update['count']
+                new_weight = jostar.number_of_ratings + update['weight']
                 new_sum = (jostar.average_rating * jostar.number_of_ratings) + update['sum']
-                new_average = new_sum / new_count if new_count > 0 else 0
+                new_average = new_sum / new_weight if new_weight > 0 else 0
 
                 jostar.number_of_ratings = new_count
                 jostar.average_rating = new_average

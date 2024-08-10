@@ -1,4 +1,5 @@
 import json
+import math
 
 from django.db.models import Prefetch
 from drf_yasg.utils import swagger_auto_schema
@@ -92,7 +93,8 @@ class RateJostarView(views.APIView):
             message = {
                 'user_id': request.user.id,
                 'jostar_id': data['jostar_id'],
-                'rating': data['rating']
+                'rating': data['rating'],
+                'weight': 1,
             }
             redis_key = f"jr:{request.user.id}:{data['jostar_id']}"
             already_cached_value = RedisProxy.get_cached_value(redis_key)
@@ -102,6 +104,19 @@ class RateJostarView(views.APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             RedisProxy.cache_with_ttl(key=redis_key, value=data['rating'])
+
+            rating_weight_redis_key = f"jrw:{data['jostar_id']}"
+            number_of_ratings_in_past_hour = \
+                RedisProxy.get_cached_value(rating_weight_redis_key)
+            if number_of_ratings_in_past_hour:
+                n = int(number_of_ratings_in_past_hour)
+                RedisProxy.increment_key(key=rating_weight_redis_key)
+                weight = ((1 / (math.exp(settings.RATING_WEIGHT_DOWNGRADING_FACTOR * (n - settings.
+                                         MAX_NORMAL_RATING_COUNT_IN_ONE_HOUR)))) / settings.
+                          RATING_WEIGHT_NORMALIZER_FACTOR)
+                message['weight'] = weight
+            else:
+                RedisProxy.cache_with_ttl(key=rating_weight_redis_key, value=1, ttl=60 * 60)
             message_str = json.dumps(message)
 
             KafkaProxy.simple_produce_to_topic(
