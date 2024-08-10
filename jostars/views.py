@@ -139,7 +139,7 @@ class ShareJostarView(views.APIView):
 
 
 class GetJostarByLinkView(views.APIView):
-    permission_classes = [IsAuthenticated]  # Ensure the user is authenticated
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, token):
         try:
