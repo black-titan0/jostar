@@ -3,7 +3,7 @@
 The word "جستار" (jostâr) in Farsi refers to an "essay" or "discourse."
 The Jostar is a backend system designed to allow users to post and rate "Jostars".
 It includes features for creating, sharing, and rating Jostars, as well as mechanisms to prevent rating manipulation and provide secure access to users.
-This project is a system design exercise, so I tried to keep thing scalable and distributed.
+This project is a system design exercise, so I tried to keep things scalable and distributed.
 
 ## Table of Contents
 
