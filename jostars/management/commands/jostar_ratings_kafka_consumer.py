@@ -105,7 +105,10 @@ class Command(BaseCommand):
                 new_count = jostar.number_of_ratings + update['count']
                 new_weight = jostar.number_of_ratings + update['weight']
                 new_sum = (jostar.average_rating * jostar.number_of_ratings) + update['sum']
-                new_average = new_sum / new_weight if new_weight > 0 else 0
+                if jostar.average_rating == 0:
+                    new_average = update['sum'] / new_weight if new_weight > 0 else 0
+                else:
+                    new_average = new_sum / new_weight if new_weight > 0 else 0
 
                 jostar.number_of_ratings = new_count
                 jostar.average_rating = new_average
